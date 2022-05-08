@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.6.0"
+  },
+  "devDependencies": {
+    "erc721a": "^3.3.0",
+    "hardhat": "^2.9.3"
+  }
+}
