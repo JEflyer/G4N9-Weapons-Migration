@@ -207,4 +207,13 @@ contract G4N9ItemsMinter is ERC721Enumerable{
     function setAuthorised(address _new) external onlyAdmin {
         authorised = _new;
     }
+
+    //returns an array of tokens held by a wallet
+    function walletOfOwner(address _wallet) public view  returns(uint16[] memory ids){
+        uint16 ownerTokenCount = uint16(balanceOf(_wallet));
+        ids = new uint16[](ownerTokenCount);
+        for(uint16 i = 0; i< ownerTokenCount; i++){
+            ids[i] = uint16(tokenOfOwnerByIndex(_wallet, i));
+        }
+    }
 }
