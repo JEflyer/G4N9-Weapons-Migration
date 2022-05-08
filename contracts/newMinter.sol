@@ -57,11 +57,6 @@ contract G4N9ItemsMinter is ERC721Enumerable{
         exchangeContract =_exchangeContract;
     }
 
-    modifier onlyExchange {
-        require(msg.sender == exchangeContract,"ERR:NE");
-        _;
-    }
-
     modifier onlyAuthorised {
         require(msg.sender == authorised,"ERR:NA");
         _;
@@ -72,39 +67,76 @@ contract G4N9ItemsMinter is ERC721Enumerable{
         _;
     }
 
-    function mintOneFor(address to, uint16 tokenId) external onlyExchange notContract(to){
-        //check that token is not already minted
-        require(!_exists(tokenId),"ERR:EX");
-
-        //check that token in above 0 & less than or equal to 10k
-        require(tokenId > 0 && tokenId <= 10000, "ERR:ID");
-
+    function mintOneFor(
+        address to,
+        uint8 weaponType,
+        uint8 effect,
+        uint8 minDMG,
+        uint8 maxDMG,
+        uint8 levelRequirement,
+        uint8 critChance,
+        uint8 accuracy,
+        string memory uri
+    ) external onlyAuthorised notContract(to){
         //increment currentlyMinted
         currentlyMinted++;
 
-        //store previous tokenId
-        previousTokenId[currentlyMinted] = tokenId;
+        //set uri
+        tokenURIs[currentlyMinted] = uri;
 
         //mint to address & use curentlyMinted as the tokenId
         _safeMint(to,uint256(currentlyMinted)); 
+
+        //set stats
+        weaponStats[currentlyMinted].weaponType = weaponType;
+        weaponStats[currentlyMinted].effect = effect;
+        weaponStats[currentlyMinted].minDMG = minDMG;
+        weaponStats[currentlyMinted].maxDMG = maxDMG;
+        weaponStats[currentlyMinted].levelRequirement = levelRequirement;
+        weaponStats[currentlyMinted].critChance = critChance;
+        weaponStats[currentlyMinted].accuracy = accuracy;
     }
 
-    function mintMulFor(address to, uint16[] memory tokenIds) external onlyExchange notContract(to){
-        for(uint8 i = 0; i < tokenIds.length; i++){
-            //check that token is not already minted
-            require(!_exists(tokenIds[i]),"ERR:EX");
+    function mintMulFor(
+        address to, 
+        uint8 amount,
+        uint8[] memory weaponType,
+        uint8[] memory effect,
+        uint8[] memory minDMG,
+        uint8[] memory maxDMG,
+        uint8[] memory levelRequirement,
+        uint8[] memory critChance,
+        uint8[] memory accuracy,
+        string[] memory uri
+    ) external onlyAuthorised notContract(to){
+        require(amount != 0, "ERR:WL");
+        require(amount == weaponType.length, "ERR:WL");
+        require(amount == effect.length, "ERR:WL");
+        require(amount == minDMG.length, "ERR:WL");
+        require(amount == maxDMG.length, "ERR:WL");
+        require(amount == levelRequirement.length, "ERR:WL");
+        require(amount == critChance.length, "ERR:WL");
+        require(amount == accuracy.length, "ERR:WL");
+        require(amount == uri.length, "ERR:WL");
 
-            //check that token in above 0 & less than or equal to 10k
-            require(tokenIds[i] > 0 && tokenIds[i] <= 10000, "ERR:ID");
-
+        for(uint8 i = 0; i < amount; i++){
             //increment curently minted
             currentlyMinted++;
 
-            //store previous tokenId
-            previousTokenId[currentlyMinted] = tokenIds[i];
+            //set uri
+            tokenURIs[currentlyMinted] = uris[i];
 
             //mint to address & use curentlyMinted as the tokenId
             _safeMint(to, uint256(currentlyMinted));
+
+            //set stats
+            weaponStats[currentlyMinted].weaponType = weaponType[i];
+            weaponStats[currentlyMinted].effect = effect[i];
+            weaponStats[currentlyMinted].minDMG = minDMG[i];
+            weaponStats[currentlyMinted].maxDMG = maxDMG[i];
+            weaponStats[currentlyMinted].levelRequirement = levelRequirement[i];
+            weaponStats[currentlyMinted].critChance = critChance[i];
+            weaponStats[currentlyMinted].accuracy = accuracy[i];
         }
     }
 
@@ -194,14 +226,6 @@ contract G4N9ItemsMinter is ERC721Enumerable{
         } else if(statChoice == 6){
             return weaponData[tokenId].accuracy;
         }
-    }
-
-    function queryPreviousTokenId(uint16 tokenId) external view returns(uint16) {
-        return previousTokenId[tokenId];
-    }
-
-    function setExchangeContract(address _new) external onlyAdmin {
-        exchangeContract = _new;
     }
 
     function setAuthorised(address _new) external onlyAdmin {
